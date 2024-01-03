@@ -47,7 +47,8 @@ def List(request):
                 "finished_count": finished_count,
                 "total_count": total_count,
             })
-    else:
+            return JsonResponse({"response": res})
+    elif usertype == "manager":
         for mission_item in mission:
             if mission_item.mission_finished_count == mission_item.mission_size:
                 continue
@@ -82,8 +83,9 @@ def List(request):
                 "finished_count": finished_count,
                 "total_count": total_count,
             })
-
-    return JsonResponse({"response": res})
+            return JsonResponse({"response": res})
+    else:
+        return JsonResponse({"response": "请先登录"})
 
 
 def list_by_dataset(request):
@@ -92,9 +94,9 @@ def list_by_dataset(request):
     :param request:
     :return:
     """
-    dataset_name = request.GET.get('dataset_name')
+    dataset_id = request.GET.get('dataset_id')
     res = []
-    missions = Mission.objects.filter(mission_dataset_name=dataset_name)
+    missions = Mission.objects.filter(mission_dataset_name=dataset_id)
     for mission in missions:
         mission_id = mission.mission_id
         expert = Expert.objects.filter(expert_id=mission.mission_expert_id)

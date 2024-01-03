@@ -22,15 +22,21 @@ def List(request):
     for data in data_all:
         if data.data_reserve == 0:  # 不保留的数据过滤掉
             continue
+        data_id = data.data_id
+        background = data.data_background
         is_labeled = data.data_status
         question = data.data_question
+        answer = data.data_answer
         keywords = data.data_keyword
         lastest_time = data.data_lastest_time
         res.append({
+            "data_id": data_id,
+            "background": background,
             "task_type": task_type,
             "data_source": data_source,
             "is_labeled": is_labeled,
             "question": question,
+            "answer": answer,
             "keywords": keywords,
             "lastest_time": lastest_time,
         })
