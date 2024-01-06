@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render
 
@@ -11,23 +12,22 @@ from common.models import Data, Mission, Expert, Dataset
 
 def get_dataset(request):
     dataset_id = request.GET.get('dataset_id')
-    data = Data.objects.filter(data_dataset_id=dataset_id).order_by('data_area', 'data_mission_id')
+    data = Data.objects.filter(data_dataset_id=dataset_id).values('data_area', 'data_mission_id').annotate(
+        data_count=Count('data_id'))
     res = []
     for data_single in data:
-        ans = {}
-        mission_id = data_single[0].data_mission_id
-        dataset_id = data_single[0].data_dataset_id
+        mission_id = data_single["data_mission_id"]
         dataset_size = Dataset.objects.filter(dataset_id=dataset_id)[0].dataset_size
         if mission_id is not None:
-            expert_id = Mission.objects.filter(mission_id=mission_id).mission_expert_id
-            expert_name = Expert.objects.filter(expert_id=expert_id).expert_name
+            expert_id = Mission.objects.filter(mission_id=mission_id)[0].mission_expert_id
+            expert_name = Expert.objects.filter(expert_id=expert_id)[0].expert_name
         else:
             expert_name = '-'
         is_assigned = True
-        if expert_name == 'None':
+        if expert_name == '-':
             is_assigned = False
-        data_size = len(data_single)
-        area = data_single[0].data_area
+        data_size = data_single["data_count"]
+        area = data_single["data_area"]
         res.append({
             "area": area,
             "data_size": data_size,

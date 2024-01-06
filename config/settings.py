@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-)1bu4fa2g+d@2q6*7pl-p@&t(#-(4bf1m+u6hysimip+)3x*r)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', '192.168.92.197', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'mission',
     'user',
     'corsheaders',  # 解决请求跨域问题
+    'werkzeug_debugger_runserver',  # 开启https需要的服务
+    'django_extensions',  # 开启https需要的服务
 ]
 
 MIDDLEWARE = [
@@ -115,7 +117,6 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Shanghai'
 
-
 USE_I18N = True
 
 USE_TZ = True
@@ -134,8 +135,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ORIGIN_ALLOW_ALL = True  # 允许所有域名跨域或者下面的白名单设置
 CORS_ORIGIN_REGEX_WHITELIST = [  # 设置可跨域白名单的IP地址
     "*",
-    "http://localhost:8080",
-    "http://127.0.0.1",
 ]
 
 CORS_ALLOW_METHODS = "*"  # 配置允许的请求方式

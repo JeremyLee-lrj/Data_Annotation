@@ -35,22 +35,24 @@ def Login(request):
     manager = Manager.objects.filter(manager_name=username, manager_password=password)
     if expert is not None:
         user = authenticate(username=username, password=password)
-        login(request, user)
-        request.session['username'] = username
-        request.session['usertype'] = 'expert'
-        return JsonResponse({'response': '登录成功'})
+        if user is not None:
+            login(request, user)
+            request.session['username'] = username
+            request.session['usertype'] = 'expert'
+            return JsonResponse({'response': '登录成功'})
+        else:
+            return JsonResponse({'response': '登陆失败,用户名或密码不正确'})
     elif manager is not None:
         user = authenticate(username=username, password=password)
-        login(request, user)
-        request.session['username'] = username
-        request.session['usertype'] = 'manager'
-        return JsonResponse({'response': '登录成功'})
-    has_expert_name = Expert.objects.filter(expert_name=username)
-    has_manager_name = Manager.objects.filter(manager_name=username)
-    if (has_manager_name is not None) and (has_expert_name is not None):
-        return JsonResponse({'response': '登陆失败，账号不存在，请先注册'})
+        if user is not None:
+            login(request, user)
+            request.session['username'] = username
+            request.session['usertype'] = 'manager'
+            return JsonResponse({'response': '登录成功'})
+        else:
+            return JsonResponse({'response': '登陆失败,用户名或密码不正确'})
     else:
-        return JsonResponse({'response': '登陆失败,用户名或密码不正确'})
+        return JsonResponse({'response': '登陆失败，账号不存在，请先注册'})
 
 
 def Logout(request):
