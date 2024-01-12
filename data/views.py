@@ -42,7 +42,6 @@ def List(request):
         })
     return JsonResponse({"response": res, "notice": mission.mission_notice})
 
-
 def label(request):
     put = QueryDict(request.body)
     put_str = list(put.items())[0][0]  # 将获取的QueryDict对象转换为 str 类型
@@ -71,7 +70,7 @@ def label(request):
             data.data_answer = json.dumps(notes)
         data.data_reserve = data_reserve
     date_time = datetime.now()
-    data.data_lastest_time = '%d/%02d/%2d %02d:%02d:%02d' % (
+    data.data_lastest_time = '%d/%02d/%02d %02d:%02d:%02d' % (
         date_time.year, date_time.month, date_time.day,
         date_time.hour, date_time.minute, date_time.second
     )

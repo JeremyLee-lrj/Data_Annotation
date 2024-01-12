@@ -7,4 +7,5 @@ urlpatterns = [
     path('list-by-dataset', views.list_by_dataset),
     path('assign', views.assign),
     path('reassign', views.reassign),
+    path('urgent', views.urgent),
 ]

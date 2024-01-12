@@ -32,14 +32,14 @@ class Data(models.Model):
     data_id = models.AutoField(primary_key=True)
     data_dataset_id = models.IntegerField()
     data_mission_id = models.IntegerField(null=True)
-    data_background = models.CharField(max_length=200, null=True)
-    data_question = models.CharField(max_length=200, null=True)
+    data_background = models.TextField(null=True)
+    data_question = models.TextField(null=True)
     data_answer = models.JSONField(null=True)
     data_status = models.IntegerField()  # 为0表示数据未标注，为1表示已标注
     data_lastest_time = models.CharField(max_length=200)
-    data_area = models.CharField(max_length=200, null=True)
-    data_keyword = models.CharField(max_length=200, null=True)
-    other = models.CharField(max_length=200, null=True)
+    data_area = models.TextField(null=True)
+    data_keyword = models.TextField(null=True)
+    other = models.TextField(null=True)
     data_reserve = models.IntegerField()  # 为0表示不保留，1表示保留
 
 

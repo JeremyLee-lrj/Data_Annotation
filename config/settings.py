@@ -44,17 +44,18 @@ INSTALLED_APPS = [
     'corsheaders',  # 解决请求跨域问题
     'werkzeug_debugger_runserver',  # 开启https需要的服务
     'django_extensions',  # 开启https需要的服务
+    # 'sslserver',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # 跨域中间件
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware', #注释跨域中间件
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # 跨域中间件
 ]
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
@@ -140,3 +141,23 @@ CORS_ORIGIN_REGEX_WHITELIST = [  # 设置可跨域白名单的IP地址
 CORS_ALLOW_METHODS = "*"  # 配置允许的请求方式
 CORS_ALLOW_HEADERS = "*"  # 配置允许的请求头
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
+
+SESSION_COOKIE_SAMESITE = None  # response header set-cookie:samesite=lax  Default: 'Lax'
+CSRF_COOKIE_SAMESITE = None
+SameSite = None
+SECURE_REFERRER_POLICY = "unsafe-url"
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'None'
+COOP_POLICY = 'None'
+SESSION_COOKIE_HTTPONLY = False
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 1024
+
+# SECURITY安全设置 - 支持http时建议开启
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# SECURE_SSL_REDIRECT = True  # 将所有非SSL请求永久重定向到SSL
+SESSION_COOKIE_SECURE = False  # 仅通过https传输cookie
+# CSRF_COOKIE_SECURE = True  # 仅通过https传输cookie
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # 严格要求使用https协议传输
+# SECURE_HSTS_PRELOAD = True  # HSTS为
+# SECURE_HSTS_SECONDS = 60
+# SECURE_CONTENT_TYPE_NOSNIFF = True  # 防止浏览器猜测资产的内容类型

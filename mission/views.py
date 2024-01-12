@@ -1,3 +1,5 @@
+import json
+
 from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
 from datetime import datetime
@@ -11,15 +13,18 @@ def List(request):
     usertype = request.session.get("usertype")
     mission = Mission.objects.all()
     if usertype == "expert":
-        expert = Expert.objects.filter(username=request.session.get("username"))
+        expert = Expert.objects.filter(expert_name=request.session.get("username"))
         mission = mission.filter(mission_expert_id=expert[0].expert_id)
         for mission_item in mission:
-            if mission_item.mission_finished_count == mission_item.mission_size:
+            if mission_item.mission_data_finished_count == mission_item.mission_size:
                 continue
             dataset = Dataset.objects.filter(dataset_id=mission_item.mission_dataset_id)
             task_type = dataset[0].dataset_task_type
             mission_data = Data.objects.filter(data_mission_id=mission_item.mission_id)
-            area = mission_data[0].data_area
+            if len(mission_data) == 0:
+                area = "-"
+            else:
+                area = mission_data[0].data_area
             resource = dataset[0].dataset_source
             assign_time = mission_item.mission_create_time
             due_time = mission_item.mission_due_time
@@ -31,13 +36,15 @@ def List(request):
             due = [due_year, due_month, due_day]
             finished_count = mission_item.mission_data_finished_count
             total_count = mission_item.mission_size
+            is_highlight = mission_item.mission_highlight
             if due < now:
                 status = "超时"
-            elif mission_item.mission_finished_count == 0:
+            elif mission_item.mission_data_finished_count == 0:
                 status = "未开始"
             else:
                 status = "未完成"
             res.append({
+                "task_id": mission_item.mission_id,
                 "task_type": task_type,
                 "area": area,
                 "resource": resource,
@@ -46,8 +53,20 @@ def List(request):
                 "status": status,
                 "finished_count": finished_count,
                 "total_count": total_count,
+                "is_highlight": is_highlight,
             })
-            return JsonResponse({"response": res})
+        temp = res
+        res = []
+        for mission in temp:
+            if mission["status"] == "超时":
+                res.append(mission)
+        for mission in temp:
+            if mission["is_highlight"] == 1:
+                res.append(mission)
+        for i in range(len(temp) - 1, -1, -1):
+            if temp[i]["status"] != "超时" and temp[i]["is_highlight"] != 1:
+                res.append(temp[i])
+        return JsonResponse({"response": res})
     elif usertype == "manager":
         for mission_item in mission:
             if mission_item.mission_finished_count == mission_item.mission_size:
@@ -67,6 +86,7 @@ def List(request):
             due = [due_year, due_month, due_day]
             finished_count = mission_item.mission_data_finished_count
             total_count = mission_item.mission_size
+            is_highlight = mission_item.mission_highlight
             if due < now:
                 status = "超时"
             elif mission_item.mission_finished_count == 0:
@@ -74,6 +94,7 @@ def List(request):
             else:
                 status = "标注中"
             res.append({
+                "task_id": mission_item.mission_id,
                 "task_type": task_type,
                 "expert_name": expert_name,
                 "dataset_name": dataset_name,
@@ -82,8 +103,13 @@ def List(request):
                 "due_time": due_time,
                 "finished_count": finished_count,
                 "total_count": total_count,
+                "is_highlight": is_highlight,
             })
-            return JsonResponse({"response": res})
+        temp = res
+        res = []
+        for i in range(len(temp) - 1, -1, -1):
+            res.append(temp[i])
+        return JsonResponse({"response": res})
     else:
         return JsonResponse({"response": "请先登录"})
 
@@ -96,14 +122,18 @@ def list_by_dataset(request):
     """
     dataset_id = request.GET.get('dataset_id')
     res = []
-    missions = Mission.objects.filter(mission_dataset_name=dataset_id)
+    dataset = Dataset.objects.filter(dataset_id=dataset_id)[0]
+    missions = Mission.objects.filter(mission_dataset_id=dataset.dataset_id)
     for mission in missions:
         mission_id = mission.mission_id
         expert = Expert.objects.filter(expert_id=mission.mission_expert_id)
         expert_name = expert[0].expert_name
         dataset = Dataset.objects.filter(dataset_id=mission.mission_dataset_id)
         mission_data = Data.objects.filter(data_mission_id=mission_id)
-        area = mission_data[0].data_area
+        if len(mission_data) == 0:
+            area = "-"
+        else:
+            area = mission_data[0].data_area
         finished_count = mission.mission_data_finished_count
         total_count = mission.mission_size
         assign_time = mission.mission_create_time
@@ -136,6 +166,7 @@ def assign(request):
     dataset_id = request.POST.get("dataset_id")
     area = request.POST.get("area")
     expert_id_list = request.POST.get("expert_id_list")
+    expert_id_list = json.loads(expert_id_list)
     notice = request.POST.get("notice")
     due_time = request.POST.get("due_time")
     n: int = len(expert_id_list)
@@ -146,7 +177,7 @@ def assign(request):
     i = 0
     data_ptr = 0
     date_time = datetime.now()
-    mission_create_time = '%d/%02d/%2d' % (date_time.year, date_time.month, date_time.day)
+    mission_create_time = '%d/%02d/%02d' % (date_time.year, date_time.month, date_time.day)
     for expert_id in expert_id_list:
         cnt = avg
         if i < m:
@@ -182,6 +213,7 @@ def reassign(request):
     put_dict = eval(put_str)  # 将str类型转换为字典类型
     mission_id = put_dict.get('mission_id')
     expert_id_list = put_dict.get('expert_id_list')
+    expert_id_list = json.loads(expert_id_list)
     mission_notice = put_dict.get('mission_notice')
     mission_due_time = put_dict.get('mission_due_time')
     mission = Mission.objects.filter(mission_id=mission_id)
@@ -225,3 +257,10 @@ def reassign(request):
             data_ptr += 1
         i += 1
     return JsonResponse({"response": "success"})
+
+
+def urgent(request):
+    mission_id = request.POST.get("mission_id")
+    mission = Mission.objects.get(mission_id=mission_id)[0]
+    mission.mission_highlight = 1
+    return JsonResponse({'response': 'success'})

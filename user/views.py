@@ -12,8 +12,22 @@ def get_current(request):
     username = request.session.get('username')
     usertype = request.session.get('usertype')
     if username is None:
-        return JsonResponse({'response': "未登录"})
-    return JsonResponse({'response': "已登录", 'username': username, 'usertype': usertype})
+        res = JsonResponse({'response': "未登录"})
+    else:
+        res = JsonResponse({'response': "已登录", 'username': username, 'usertype': usertype})
+    res['Access-Control-Allow-Origin'] = request.get_host()
+    res['Same-Site'] = 'None'
+    res['Secure'] = True
+    # print(res.headers)
+    # res['Set-Cookie'] = res['Set-Cookie'] + '; SameSite=None; Secure'
+    res['Session-Cookie-Same-Site'] = 'None'
+    res['Session-Cookie-Secure'] = True
+    res['Session-Cookie-HttpOnly'] = False
+    res['Referrer-Policy'] = 'no-referrer'
+    res['Access-Control-Allow-Credentials'] = 'true'
+    res['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept'
+    res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    return res
 
 
 def List(request):
@@ -33,22 +47,48 @@ def Login(request):
 
     expert = Expert.objects.filter(expert_name=username, expert_password=password)
     manager = Manager.objects.filter(manager_name=username, manager_password=password)
-    if expert is not None:
+    if len(expert) > 0:
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
             request.session['username'] = username
             request.session['usertype'] = 'expert'
-            return JsonResponse({'response': '登录成功'})
+            res = JsonResponse({'response': '登录成功'})
+            res['Access-Control-Allow-Origin'] = request.get_host()
+            res['Same-Site'] = 'None'
+            res['Secure'] = True
+            # print(res['Set-Cookie'])
+            # res['Set-Cookie'] = res['Set-Cookie'] + '; SameSite=None; Secure'
+            res['Session-Cookie-Same-Site'] = 'None'
+            res['Session-Cookie-Secure'] = True
+            res['Session-Cookie-HttpOnly'] = False
+            res['Referrer-Policy'] = 'no-referrer'
+            res['Access-Control-Allow-Credentials'] = 'true'
+            res['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept'
+            res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            return res
         else:
             return JsonResponse({'response': '登陆失败,用户名或密码不正确'})
-    elif manager is not None:
+    elif len(manager) > 0:
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
             request.session['username'] = username
             request.session['usertype'] = 'manager'
-            return JsonResponse({'response': '登录成功'})
+            res = JsonResponse({'response': '登录成功'})
+            res['Access-Control-Allow-Origin'] = request.get_host()
+            res['Same-Site'] = 'None'
+            res['Secure'] = True
+            # print(res['Set-Cookie'])
+            # res['Set-Cookie'] = res['Set-Cookie'] + '; SameSite=None; Secure'
+            res['Session-Cookie-Same-Site'] = 'None'
+            res['Session-Cookie-Secure'] = True
+            res['Session-Cookie-HttpOnly'] = False
+            res['Referrer-Policy'] = 'no-referrer'
+            res['Access-Control-Allow-Credentials'] = 'true'
+            res['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept'
+            res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            return res
         else:
             return JsonResponse({'response': '登陆失败,用户名或密码不正确'})
     else:
@@ -70,4 +110,15 @@ def Register(request):
     User.objects.create_user(username=expert_name, password=expert_password)
     Expert.objects.create(expert_name=expert_name, expert_password=expert_password,
                           expert_area=expert_area)
+    return JsonResponse({'response': '注册成功'})
+
+
+def Register_Manager(request):
+    manager_name = request.POST.get('username')
+    manager_password = request.POST.get('password')
+    res = Manager.objects.filter(manager_name=manager_name)
+    if len(res) != 0:
+        return JsonResponse({'response': '注册失败，用户名已存在'})
+    User.objects.create_user(username=manager_name, password=manager_password)
+    Manager.objects.create(manager_name=manager_name, manager_password=manager_password)
     return JsonResponse({'response': '注册成功'})
