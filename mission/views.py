@@ -69,7 +69,7 @@ def List(request):
         return JsonResponse({"response": res})
     elif usertype == "manager":
         for mission_item in mission:
-            if mission_item.mission_finished_count == mission_item.mission_size:
+            if mission_item.mission_data_finished_count == mission_item.mission_size:
                 continue
             dataset = Dataset.objects.filter(dataset_id=mission_item.mission_dataset_id)
             dataset_name = dataset[0].dataset_name
@@ -261,6 +261,6 @@ def reassign(request):
 
 def urgent(request):
     mission_id = request.POST.get("mission_id")
-    mission = Mission.objects.get(mission_id=mission_id)[0]
+    mission = Mission.objects.filter(mission_id=mission_id)[0]
     mission.mission_highlight = 1
     return JsonResponse({'response': 'success'})

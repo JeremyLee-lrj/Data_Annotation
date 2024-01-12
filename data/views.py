@@ -10,7 +10,7 @@ from common.models import Data, Mission, Expert, Dataset
 
 def List(request):
     mission_id = request.GET.get("mission_id")
-    mission = Mission.objects.get(mission_id=mission_id)
+    mission = Mission.objects.filter(mission_id=mission_id)
     mission = mission[0]
     data_all = Data.objects.filter(data_mission_id=mission_id)
     data_all.order_by('data_status')

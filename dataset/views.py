@@ -139,7 +139,7 @@ def upload_dataset(request):
 
 def download_dataset(request):
     dataset_id = request.GET.get("dataset_id")
-    dataset = Dataset.objects.get(dataset_id=dataset_id)[0]
+    dataset = Dataset.objects.filter(dataset_id=dataset_id)[0]
     data_list = Data.objects.filter(data_dataset_id=dataset_id).filter(data_reserve=1)
     dataset.dataset_status = 1
     res = []
@@ -156,4 +156,4 @@ def download_dataset(request):
             "other": data.other,
             "expert_name": expert_name,
         })
-    return JsonResponse(res)
+    return JsonResponse({"response": res})

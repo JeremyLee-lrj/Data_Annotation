@@ -6,15 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="1727e937-8f02-49b7-b965-41343f5d5e55" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataset/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dataset/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mission/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/mission/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mission/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/mission/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -154,7 +148,8 @@
       <workItem from="1704867614087" duration="14446000" />
       <workItem from="1704935624245" duration="1815000" />
       <workItem from="1705041535613" duration="3916000" />
-      <workItem from="1705047720115" duration="14635000" />
+      <workItem from="1705047720115" duration="15047000" />
+      <workItem from="1705074955614" duration="636000" />
     </task>
     <servers />
   </component>
