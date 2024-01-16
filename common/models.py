@@ -56,3 +56,12 @@ class Mission(models.Model):
     mission_original_id = models.IntegerField(null=True)
     mission_transfer = models.IntegerField()  # 为0代表任务未移交，为1代表任务已移交
     mission_highlight = models.IntegerField()  # 为0代表任务未高亮，为1代表任务被管理员催促，需要高亮。
+
+
+class Session(models.Model):
+    session_id = models.AutoField(primary_key=True)
+    session_username = models.TextField()
+    session_usertype = models.TextField()
+    session_last_login_year = models.IntegerField(null=True)
+    session_last_login_month = models.IntegerField(null=True)
+    session_status = models.IntegerField()  # 0代表未登录，1代表已登录

@@ -1,33 +1,58 @@
+import datetime
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 
-from common.models import Expert, Manager
+from common.models import Expert, Manager, Session
 
 
 # Create your views here.
 
 def get_current(request):
-    username = request.session.get('username')
-    usertype = request.session.get('usertype')
-    if username is None:
-        res = JsonResponse({'response': "未登录"})
+    if len(Session.objects.all()) == 0:
+        Session.objects.create(
+            session_username="-",
+            session_usertype="-",
+            session_status=0
+        )
     else:
-        res = JsonResponse({'response': "已登录", 'username': username, 'usertype': usertype})
-    res['Access-Control-Allow-Origin'] = request.get_host()
-    res['Same-Site'] = 'None'
-    res['Secure'] = True
-    # print(res.headers)
-    # res['Set-Cookie'] = res['Set-Cookie'] + '; SameSite=None; Secure'
-    res['Session-Cookie-Same-Site'] = 'None'
-    res['Session-Cookie-Secure'] = True
-    res['Session-Cookie-HttpOnly'] = False
-    res['Referrer-Policy'] = 'no-referrer'
-    res['Access-Control-Allow-Credentials'] = 'true'
-    res['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept'
-    res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    return res
+        session = Session.objects.all()[0]
+        now = datetime.datetime.now()
+        if now.year != session.session_last_login_year or now.month != session.session_last_login_month:
+            session.session_status = 0
+
+    session = Session.objects.all()[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    else:
+        return JsonResponse(
+            {
+                'response': "已登录",
+                'username': session.session_username,
+                'usertype': session.session_usertype
+            }
+        )
+    # username = request.session.get('username')
+    # usertype = request.session.get('usertype')
+    # if username is None:
+    #     res = JsonResponse({'response': "未登录"})
+    # else:
+    #     res = JsonResponse({'response': "已登录", 'username': username, 'usertype': usertype})
+    # res['Access-Control-Allow-Origin'] = request.get_host()
+    # res['Same-Site'] = 'None'
+    # res['Secure'] = True
+    # # print(res.headers)
+    # # res['Set-Cookie'] = res['Set-Cookie'] + '; SameSite=None; Secure'
+    # res['Session-Cookie-Same-Site'] = 'None'
+    # res['Session-Cookie-Secure'] = True
+    # res['Session-Cookie-HttpOnly'] = False
+    # res['Referrer-Policy'] = 'no-referrer'
+    # res['Access-Control-Allow-Credentials'] = 'true'
+    # res['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept'
+    # res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    # return res
 
 
 def List(request):
@@ -44,7 +69,13 @@ def List(request):
 def Login(request):
     username = request.GET.get('username')
     password = request.GET.get('password')
-
+    if len(Session.objects.all()) == 0:
+        Session.objects.create(
+            session_username="-",
+            session_usertype="-",
+            session_status=0
+        )
+    session = Session.objects.all()[0]
     expert = Expert.objects.filter(expert_name=username, expert_password=password)
     manager = Manager.objects.filter(manager_name=username, manager_password=password)
     if len(expert) > 0:
@@ -53,19 +84,25 @@ def Login(request):
             login(request, user)
             request.session['username'] = username
             request.session['usertype'] = 'expert'
+            session.session_username = username
+            session.session_usertype = 'expert'
+            session.session_last_login_year = datetime.datetime.now().year
+            session.session_last_login_month = datetime.datetime.now().month
+            session.session_status = 1
+            session.save()
             res = JsonResponse({'response': '登录成功'})
-            res['Access-Control-Allow-Origin'] = request.get_host()
-            res['Same-Site'] = 'None'
-            res['Secure'] = True
-            # print(res['Set-Cookie'])
-            # res['Set-Cookie'] = res['Set-Cookie'] + '; SameSite=None; Secure'
-            res['Session-Cookie-Same-Site'] = 'None'
-            res['Session-Cookie-Secure'] = True
-            res['Session-Cookie-HttpOnly'] = False
-            res['Referrer-Policy'] = 'no-referrer'
-            res['Access-Control-Allow-Credentials'] = 'true'
-            res['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept'
-            res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            # res['Access-Control-Allow-Origin'] = request.get_host()
+            # res['Same-Site'] = 'None'
+            # res['Secure'] = True
+            # # print(res['Set-Cookie'])
+            # # res['Set-Cookie'] = res['Set-Cookie'] + '; SameSite=None; Secure'
+            # res['Session-Cookie-Same-Site'] = 'None'
+            # res['Session-Cookie-Secure'] = True
+            # res['Session-Cookie-HttpOnly'] = False
+            # res['Referrer-Policy'] = 'no-referrer'
+            # res['Access-Control-Allow-Credentials'] = 'true'
+            # res['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept'
+            # res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
             return res
         else:
             return JsonResponse({'response': '登陆失败,用户名或密码不正确'})
@@ -75,6 +112,12 @@ def Login(request):
             login(request, user)
             request.session['username'] = username
             request.session['usertype'] = 'manager'
+            session.session_username = username
+            session.session_usertype = 'manager'
+            session.session_last_login_year = datetime.datetime.now().year
+            session.session_last_login_month = datetime.datetime.now().month
+            session.session_status = 1
+            session.save()
             res = JsonResponse({'response': '登录成功'})
             res['Access-Control-Allow-Origin'] = request.get_host()
             res['Same-Site'] = 'None'
@@ -96,7 +139,16 @@ def Login(request):
 
 
 def Logout(request):
+    if len(Session.objects.all()) == 0:
+        Session.objects.create(
+            session_username="-",
+            session_usertype="-",
+            session_status=0
+        )
     logout(request)
+    session = Session.objects.all()[0]
+    session.session_status = 0
+    session.save()
     return JsonResponse({'response': '登出成功'})
 
 

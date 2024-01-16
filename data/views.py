@@ -42,14 +42,25 @@ def List(request):
         })
     return JsonResponse({"response": res, "notice": mission.mission_notice})
 
+
 def label(request):
-    put = QueryDict(request.body)
-    put_str = list(put.items())[0][0]  # 将获取的QueryDict对象转换为 str 类型
-    put_dict = eval(put_str)  # 将str类型转换为字典类型
-    data_id = put_dict('data_id')
-    data_question = put_dict('data_question')
-    data_answer = put_dict('data_answer')
-    data_reserve = put_dict('data_reserve')
+    # put = QueryDict(request.body)
+    # put_str = list(put.items())[0][0]  # 将获取的QueryDict对象转换为 str 类型
+    # put_dict = eval(put_str)  # 将str类型转换为字典类型
+    # data_id = put_dict.get('data_id')
+    # data_question = put_dict.get('data_question')
+    # data_answer = put_dict.get('data_answer')
+    # data_reserve = put_dict.get('data_reserve')
+    data = json.loads(request.body)
+    data_id = data['data_id']
+    data_question = data['data_question']
+    data_answer = data['data_answer']
+    data_reserve = data['data_reserve']
+    # request.PUT = request.GET
+    # data_id = request.PUT.get('data_id')
+    # data_question = request.PUT.get('data_question')
+    # data_answer = request.PUT.get('data_answer')
+    # data_reserve = request.PUT.get('data_reserve')
 
     data = Data.objects.filter(data_id=data_id)
     data = data[0]
