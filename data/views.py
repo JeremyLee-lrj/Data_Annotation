@@ -44,23 +44,13 @@ def List(request):
 
 
 def label(request):
-    # put = QueryDict(request.body)
-    # put_str = list(put.items())[0][0]  # 将获取的QueryDict对象转换为 str 类型
-    # put_dict = eval(put_str)  # 将str类型转换为字典类型
-    # data_id = put_dict.get('data_id')
-    # data_question = put_dict.get('data_question')
-    # data_answer = put_dict.get('data_answer')
-    # data_reserve = put_dict.get('data_reserve')
-    data = json.loads(request.body)
-    data_id = data['data_id']
-    data_question = data['data_question']
-    data_answer = data['data_answer']
-    data_reserve = data['data_reserve']
-    # request.PUT = request.GET
-    # data_id = request.PUT.get('data_id')
-    # data_question = request.PUT.get('data_question')
-    # data_answer = request.PUT.get('data_answer')
-    # data_reserve = request.PUT.get('data_reserve')
+    put_dict = QueryDict(request.body)
+
+    data_id = put_dict.get('data_id')
+    data_question = put_dict.get('data_question')
+    data_answer = put_dict.get('data_answer')
+    data_reserve = put_dict.get('data_reserve')
+
 
     data = Data.objects.filter(data_id=data_id)
     data = data[0]
@@ -72,12 +62,13 @@ def label(request):
     if task_type == "信息补充":
         data.data_question = data_question
         data.data_answer = data_answer
+        print(data.data_answer)
     elif task_type == "质量排序":
         data.data_answer = data_answer
     else:
         data.data_answer = data_answer
         if data.data_answer is None:
-            notes = put_dict('notes')
+            notes = request.POST.get('notes')
             data.data_answer = json.dumps(notes)
         data.data_reserve = data_reserve
     date_time = datetime.now()
@@ -91,4 +82,5 @@ def label(request):
     data.save()
     mission.save()
     dataset.save()
+    res = JsonResponse({"response": "success"})
     return JsonResponse({"response": "success"})

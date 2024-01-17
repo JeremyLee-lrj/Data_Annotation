@@ -133,6 +133,16 @@ def upload_dataset(request):
             other=data_item["other"],
             data_reserve=1,
         )
+        res = []
+        i = 0
+        for ans in data.data_answer:
+            res.append({
+                "answer": ans,
+                "ranking_number": i,
+                "reserve": 1,
+            })
+            i = i + 1
+        data.data_answer = json.dumps(res)
         data.save()
     return JsonResponse({"response": "success"})
 
