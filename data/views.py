@@ -51,7 +51,6 @@ def label(request):
     data_answer = put_dict.get('data_answer')
     data_reserve = put_dict.get('data_reserve')
 
-
     data = Data.objects.filter(data_id=data_id)
     data = data[0]
     dataset = Dataset.objects.filter(dataset_id=data.data_dataset_id)
@@ -76,11 +75,11 @@ def label(request):
         date_time.year, date_time.month, date_time.day,
         date_time.hour, date_time.minute, date_time.second
     )
+    if data.data_status == 0:
+        mission.mission_data_finished_count += 1
+        dataset.dataset_data_finished_count += 1
     data.data_status = 1
-    mission.mission_data_finished_count += 1
-    dataset.dataset_data_finished_count += 1
     data.save()
     mission.save()
     dataset.save()
-    res = JsonResponse({"response": "success"})
     return JsonResponse({"response": "success"})
