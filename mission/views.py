@@ -3,17 +3,25 @@ import json
 from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
 from datetime import datetime
-from common.models import Data, Mission, Expert, Dataset
+from common.models import Data, Mission, Expert, Dataset, Session
 
 
 # Create your views here.
 
 def List(request):
     res = []
-    usertype = request.session.get("usertype")
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
+
+    session = session[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    usertype = session.session_usertype
     mission = Mission.objects.all()
     if usertype == "expert":
-        expert = Expert.objects.filter(expert_name=request.session.get("username"))
+        expert = Expert.objects.filter(expert_name=session.session_username)
         mission = mission.filter(mission_expert_id=expert[0].expert_id)
         for mission_item in mission:
             if mission_item.mission_data_finished_count == mission_item.mission_size:
@@ -89,7 +97,7 @@ def List(request):
             is_highlight = mission_item.mission_highlight
             if due < now:
                 status = "超时"
-            elif mission_item.mission_finished_count == 0:
+            elif mission_item.mission_data_finished_count == 0:
                 status = "已分配"
             else:
                 status = "标注中"
@@ -120,6 +128,16 @@ def list_by_dataset(request):
     :param request:
     :return:
     """
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
+
+    session = session[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    if session.session_usertype == 'expert':
+        return JsonResponse({'response': "非管理员用户"})
     dataset_id = request.GET.get('dataset_id')
     res = []
     dataset = Dataset.objects.filter(dataset_id=dataset_id)[0]
@@ -163,6 +181,16 @@ def list_by_dataset(request):
 
 
 def assign(request):
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
+
+    session = session[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    if session.session_usertype == 'expert':
+        return JsonResponse({'response': "非管理员用户"})
     dataset_id = request.POST.get("dataset_id")
     area = request.POST.get("area")
     expert_id_list = request.POST.get("expert_id_list")
@@ -197,8 +225,9 @@ def assign(request):
         )
         mission.save()
         dataset = Dataset.objects.filter(dataset_id=dataset_id)
-        dataset[0].dataset_assign_time = mission_create_time
-        dataset[0].save()
+        dataset = dataset[0]
+        dataset.dataset_assign_time = mission_create_time
+        dataset.save()
         for _ in range(cnt):
             data[data_ptr].data_mission_id = mission.mission_id
             data[data_ptr].save()
@@ -208,9 +237,18 @@ def assign(request):
 
 
 def reassign(request):
-    put = QueryDict(request.body)
-    put_str = list(put.items())[0][0]  # 将获取的QueryDict对象转换为str 类型
-    put_dict = eval(put_str)  # 将str类型转换为字典类型
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
+
+    session = session[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    if session.session_usertype == 'expert':
+        return JsonResponse({'response': "非管理员用户"})
+    put_dict = QueryDict(request.body)
+
     mission_id = put_dict.get('mission_id')
     expert_id_list = put_dict.get('expert_id_list')
     expert_id_list = json.loads(expert_id_list)
@@ -228,8 +266,7 @@ def reassign(request):
     finished_tot_avg = int(finished_tot / n)
     i = 0
     data_ptr = 0
-    data = Data.objects.filter(data_mission_id=mission.mission_id)
-    data.filter(data_status=0)
+    data = Data.objects.filter(data_mission_id=mission.mission_id, data_status=0)
     for expert_id in expert_id_list:
         finished_tot_cnt = finished_tot_avg
         tot_cnt = tot_avg
@@ -260,6 +297,16 @@ def reassign(request):
 
 
 def urgent(request):
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
+
+    session = session[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    if session.session_usertype == 'expert':
+        return JsonResponse({'response': "非管理员用户"})
     mission_id = request.POST.get("mission_id")
     mission = Mission.objects.filter(mission_id=mission_id)[0]
     mission.mission_highlight = 1

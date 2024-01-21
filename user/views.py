@@ -11,19 +11,12 @@ from common.models import Expert, Manager, Session
 # Create your views here.
 
 def get_current(request):
-    if len(Session.objects.all()) == 0:
-        Session.objects.create(
-            session_username="-",
-            session_usertype="-",
-            session_status=0
-        )
-    else:
-        session = Session.objects.all()[0]
-        now = datetime.datetime.now()
-        if now.year != session.session_last_login_year or now.month != session.session_last_login_month:
-            session.session_status = 0
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
 
-    session = Session.objects.all()[0]
+    session = session[0]
     if session.session_status == 0:
         return JsonResponse({'response': "未登录"})
     else:
@@ -56,6 +49,16 @@ def get_current(request):
 
 
 def List(request):
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
+
+    session = session[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    if session.session_usertype == 'expert':
+        return JsonResponse({'response': "非管理员用户"})
     qs = Expert.objects.all()
     res = []
     for expert in qs:
@@ -69,13 +72,8 @@ def List(request):
 def Login(request):
     username = request.GET.get('username')
     password = request.GET.get('password')
-    if len(Session.objects.all()) == 0:
-        Session.objects.create(
-            session_username="-",
-            session_usertype="-",
-            session_status=0
-        )
-    session = Session.objects.all()[0]
+    print(username)
+    print(password)
     expert = Expert.objects.filter(expert_name=username, expert_password=password)
     manager = Manager.objects.filter(manager_name=username, manager_password=password)
     if len(expert) > 0:
@@ -84,41 +82,15 @@ def Login(request):
             login(request, user)
             request.session['username'] = username
             request.session['usertype'] = 'expert'
-            session.session_username = username
-            session.session_usertype = 'expert'
-            session.session_last_login_year = datetime.datetime.now().year
-            session.session_last_login_month = datetime.datetime.now().month
-            session.session_status = 1
+            session = Session(
+                session_username=username,
+                session_usertype='expert',
+                session_last_login_year=datetime.datetime.now().year,
+                session_last_login_month=datetime.datetime.now().month,
+                session_status=1
+            )
             session.save()
-            res = JsonResponse({'response': '登录成功'})
-            # res['Access-Control-Allow-Origin'] = request.get_host()
-            # res['Same-Site'] = 'None'
-            # res['Secure'] = True
-            # # print(res['Set-Cookie'])
-            # # res['Set-Cookie'] = res['Set-Cookie'] + '; SameSite=None; Secure'
-            # res['Session-Cookie-Same-Site'] = 'None'
-            # res['Session-Cookie-Secure'] = True
-            # res['Session-Cookie-HttpOnly'] = False
-            # res['Referrer-Policy'] = 'no-referrer'
-            # res['Access-Control-Allow-Credentials'] = 'true'
-            # res['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept'
-            # res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-            return res
-        else:
-            return JsonResponse({'response': '登陆失败,用户名或密码不正确'})
-    elif len(manager) > 0:
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            login(request, user)
-            request.session['username'] = username
-            request.session['usertype'] = 'manager'
-            session.session_username = username
-            session.session_usertype = 'manager'
-            session.session_last_login_year = datetime.datetime.now().year
-            session.session_last_login_month = datetime.datetime.now().month
-            session.session_status = 1
-            session.save()
-            res = JsonResponse({'response': '登录成功'})
+            res = JsonResponse({'response': '登录成功', 'Session-Id': session.session_id})
             res['Access-Control-Allow-Origin'] = request.get_host()
             res['Same-Site'] = 'None'
             res['Secure'] = True
@@ -134,21 +106,47 @@ def Login(request):
             return res
         else:
             return JsonResponse({'response': '登陆失败,用户名或密码不正确'})
+    elif len(manager) > 0:
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            login(request, user)
+            request.session['username'] = username
+            request.session['usertype'] = 'manager'
+            session = Session(
+                session_username=username,
+                session_usertype='manager',
+                session_last_login_year=datetime.datetime.now().year,
+                session_last_login_month=datetime.datetime.now().month,
+                session_status=1
+            )
+            session.save()
+            res = JsonResponse({'response': '登录成功', 'Session-Id': session.session_id})
+            # res['Same-Site'] = 'None'
+            # res['Secure'] = True
+            # # print(res['Set-Cookie'])
+            # # res['Set-Cookie'] = res['Set-Cookie'] + '; SameSite=None; Secure'
+            # res['Session-Cookie-Same-Site'] = 'None'
+            # res['Session-Cookie-Secure'] = True
+            # res['Session-Cookie-HttpOnly'] = False
+            # res['Referrer-Policy'] = 'no-referrer'
+            # res['Access-Control-Allow-Credentials'] = 'true'
+            # res['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept'
+            # res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            return res
+        else:
+            return JsonResponse({'response': '登陆失败,用户名或密码不正确'})
     else:
         return JsonResponse({'response': '登陆失败，账号不存在，请先注册'})
 
 
 def Logout(request):
-    if len(Session.objects.all()) == 0:
-        Session.objects.create(
-            session_username="-",
-            session_usertype="-",
-            session_status=0
-        )
+    session_id = request.headers.get("Session_id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) != 0:
+        session = session[0]
+        session.session_status = 0
+        session.save()
     logout(request)
-    session = Session.objects.all()[0]
-    session.session_status = 0
-    session.save()
     return JsonResponse({'response': '登出成功'})
 
 

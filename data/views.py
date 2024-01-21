@@ -3,12 +3,22 @@ import json
 from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
 from datetime import datetime
-from common.models import Data, Mission, Expert, Dataset
+from common.models import Data, Mission, Expert, Dataset, Session
 
 
 # Create your views here.
 
 def List(request):
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
+
+    session = session[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    if session.session_usertype == 'manager':
+        return JsonResponse({'response': "非专家用户"})
     mission_id = request.GET.get("mission_id")
     mission = Mission.objects.filter(mission_id=mission_id)
     mission = mission[0]
@@ -44,6 +54,16 @@ def List(request):
 
 
 def label(request):
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
+
+    session = session[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    if session.session_usertype == 'manager':
+        return JsonResponse({'response': "专家用户"})
     put_dict = QueryDict(request.body)
 
     data_id = put_dict.get('data_id')
@@ -61,7 +81,6 @@ def label(request):
     if task_type == "信息补充":
         data.data_question = data_question
         data.data_answer = data_answer
-        print(data.data_answer)
     elif task_type == "质量排序":
         data.data_answer = data_answer
     else:

@@ -5,12 +5,22 @@ from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from common.models import Data, Mission, Expert, Dataset
+from common.models import Data, Mission, Expert, Dataset, Session
 
 
 # Create your views here.
 
 def get_dataset(request):
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
+
+    session = session[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    if session.session_usertype == 'expert':
+        return JsonResponse({'response': "非管理员用户"})
     dataset_id = request.GET.get('dataset_id')
     data = Data.objects.filter(data_dataset_id=dataset_id).values('data_area', 'data_mission_id').annotate(
         data_count=Count('data_id'))
@@ -43,6 +53,16 @@ def get_dataset(request):
 
 
 def list_dataset(request):
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
+
+    session = session[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    if session.session_usertype == 'expert':
+        return JsonResponse({'response': "非管理员用户"})
     dataset = Dataset.objects.filter(dataset_status=0)
     res = []
     for data in dataset:
@@ -98,6 +118,16 @@ def list_dataset(request):
 #    ]
 # '''
 def upload_dataset(request):
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
+
+    session = session[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    if session.session_usertype == 'expert':
+        return JsonResponse({'response': "非管理员用户"})
     data = request.POST
     dataset_name = data.get("dataset_name")
     dataset_task_type = data.get("dataset_task_type")
@@ -148,6 +178,16 @@ def upload_dataset(request):
 
 
 def download_dataset(request):
+    session_id = request.headers.get("Session-Id")
+    session = Session.objects.filter(session_id=session_id)
+    if len(session) == 0:
+        return JsonResponse({'response': "未登录"})
+
+    session = session[0]
+    if session.session_status == 0:
+        return JsonResponse({'response': "未登录"})
+    if session.session_usertype == 'expert':
+        return JsonResponse({'response': "非管理员用户"})
     dataset_id = request.GET.get("dataset_id")
     dataset = Dataset.objects.filter(dataset_id=dataset_id)[0]
     data_list = Data.objects.filter(data_dataset_id=dataset_id).filter(data_reserve=1)
