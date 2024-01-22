@@ -10,7 +10,7 @@ from common.models import Data, Mission, Expert, Dataset, Session
 
 def List(request):
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 
@@ -55,7 +55,7 @@ def List(request):
 
 def label(request):
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 

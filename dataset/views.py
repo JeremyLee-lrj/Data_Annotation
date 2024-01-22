@@ -3,7 +3,6 @@ from datetime import datetime
 
 from django.db.models import Count
 from django.http import JsonResponse
-from django.shortcuts import render
 
 from common.models import Data, Mission, Expert, Dataset, Session
 
@@ -12,7 +11,7 @@ from common.models import Data, Mission, Expert, Dataset, Session
 
 def get_dataset(request):
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 
@@ -54,7 +53,7 @@ def get_dataset(request):
 
 def list_dataset(request):
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 
@@ -119,7 +118,7 @@ def list_dataset(request):
 # '''
 def upload_dataset(request):
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 
@@ -179,7 +178,7 @@ def upload_dataset(request):
 
 def download_dataset(request):
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 

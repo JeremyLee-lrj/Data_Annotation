@@ -7,12 +7,21 @@ from django.http import HttpResponse, JsonResponse
 
 from common.models import Expert, Manager, Session
 
+import secrets
+import string
+
+
+def generate_random_string(length):
+    letters = string.ascii_letters
+    random_string = ''.join(secrets.choice(letters) for _ in range(length))
+    return random_string
+
 
 # Create your views here.
 
 def get_current(request):
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 
@@ -50,7 +59,7 @@ def get_current(request):
 
 def List(request):
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 
@@ -72,8 +81,8 @@ def List(request):
 def Login(request):
     username = request.GET.get('username')
     password = request.GET.get('password')
-    print(username)
-    print(password)
+    # print(username)
+    # print(password)
     expert = Expert.objects.filter(expert_name=username, expert_password=password)
     manager = Manager.objects.filter(manager_name=username, manager_password=password)
     if len(expert) > 0:
@@ -82,15 +91,21 @@ def Login(request):
             login(request, user)
             request.session['username'] = username
             request.session['usertype'] = 'expert'
+            session_info = generate_random_string(10)
+            exist = Session.objects.filter(session_info=session_info)
+            while len(exist) > 0:
+                session_info = generate_random_string(10)
+                exist = Session.objects.filter(session_info=session_info)
             session = Session(
                 session_username=username,
                 session_usertype='expert',
                 session_last_login_year=datetime.datetime.now().year,
                 session_last_login_month=datetime.datetime.now().month,
-                session_status=1
+                session_status=1,
+                session_info=session_info,
             )
             session.save()
-            res = JsonResponse({'response': '登录成功', 'Session-Id': session.session_id})
+            res = JsonResponse({'response': '登录成功', 'Session-Id': session.session_info})
             res['Access-Control-Allow-Origin'] = request.get_host()
             res['Same-Site'] = 'None'
             res['Secure'] = True
@@ -112,15 +127,21 @@ def Login(request):
             login(request, user)
             request.session['username'] = username
             request.session['usertype'] = 'manager'
+            session_info = generate_random_string(10)
+            exist = Session.objects.filter(session_info=session_info)
+            while len(exist) > 0:
+                session_info = generate_random_string(10)
+                exist = Session.objects.filter(session_info=session_info)
             session = Session(
                 session_username=username,
                 session_usertype='manager',
                 session_last_login_year=datetime.datetime.now().year,
                 session_last_login_month=datetime.datetime.now().month,
-                session_status=1
+                session_status=1,
+                session_info=session_info,
             )
             session.save()
-            res = JsonResponse({'response': '登录成功', 'Session-Id': session.session_id})
+            res = JsonResponse({'response': '登录成功', 'Session-Id': session.session_info})
             # res['Same-Site'] = 'None'
             # res['Secure'] = True
             # # print(res['Set-Cookie'])
@@ -141,7 +162,7 @@ def Login(request):
 
 def Logout(request):
     session_id = request.headers.get("Session_id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) != 0:
         session = session[0]
         session.session_status = 0

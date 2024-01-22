@@ -65,3 +65,4 @@ class Session(models.Model):
     session_last_login_year = models.IntegerField(null=True)
     session_last_login_month = models.IntegerField(null=True)
     session_status = models.IntegerField()  # 0代表未登录，1代表已登录
+    session_info = models.TextField()

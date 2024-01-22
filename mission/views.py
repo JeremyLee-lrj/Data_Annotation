@@ -11,7 +11,7 @@ from common.models import Data, Mission, Expert, Dataset, Session
 def List(request):
     res = []
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 
@@ -129,7 +129,7 @@ def list_by_dataset(request):
     :return:
     """
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 
@@ -182,7 +182,7 @@ def list_by_dataset(request):
 
 def assign(request):
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 
@@ -238,7 +238,7 @@ def assign(request):
 
 def reassign(request):
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 
@@ -298,7 +298,7 @@ def reassign(request):
 
 def urgent(request):
     session_id = request.headers.get("Session-Id")
-    session = Session.objects.filter(session_id=session_id)
+    session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
         return JsonResponse({'response': "未登录"})
 
