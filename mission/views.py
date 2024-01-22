@@ -64,11 +64,15 @@ def List(request):
                 "is_highlight": is_highlight,
             })
         temp = res
+        st = {}
         res = []
         for mission in temp:
             if mission["status"] == "超时":
                 res.append(mission)
+            st[mission["task_id"]] = 1
         for mission in temp:
+            if st[mission["task_id"]] == 1:
+                continue
             if mission["is_highlight"] == 1:
                 res.append(mission)
         for i in range(len(temp) - 1, -1, -1):
@@ -310,4 +314,5 @@ def urgent(request):
     mission_id = request.POST.get("mission_id")
     mission = Mission.objects.filter(mission_id=mission_id)[0]
     mission.mission_highlight = 1
+    mission.save()
     return JsonResponse({'response': 'success'})
