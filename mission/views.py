@@ -64,14 +64,12 @@ def List(request):
                 "is_highlight": is_highlight,
             })
         temp = res
-        st = {}
         res = []
         for mission in temp:
             if mission["status"] == "超时":
                 res.append(mission)
-            st[mission["task_id"]] = 1
         for mission in temp:
-            if st[mission["task_id"]] == 1:
+            if mission["status"] == "超时":
                 continue
             if mission["is_highlight"] == 1:
                 res.append(mission)
