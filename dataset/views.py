@@ -208,7 +208,7 @@ def download_dataset(request):
         res.append({
             "data_background": data.data_background,
             "data_question": data.data_question,
-            "data_answer": data.data_answer,
+            "data_answer": json.loads(data.data_answer),
             "data_area": data.data_area,
             "data_keyword": data.data_keyword,
             "other": data.other,

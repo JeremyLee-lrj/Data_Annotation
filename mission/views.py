@@ -185,6 +185,7 @@ def list_by_dataset(request):
 
 
 def assign(request):
+    print("----Get data from fron-end----")
     session_id = request.headers.get("Session-Id")
     session = Session.objects.filter(session_info=session_id)
     if len(session) == 0:
@@ -195,6 +196,8 @@ def assign(request):
         return JsonResponse({'response': "未登录"})
     if session.session_usertype == 'expert':
         return JsonResponse({'response': "非管理员用户"})
+
+    print("----Verify user authentication finished----")
     dataset_id = request.POST.get("dataset_id")
     area = request.POST.get("area")
     expert_id_list = request.POST.get("expert_id_list")
@@ -210,6 +213,7 @@ def assign(request):
     data_ptr = 0
     date_time = datetime.now()
     mission_create_time = '%d/%02d/%02d' % (date_time.year, date_time.month, date_time.day)
+    print("----pre process finished----")
     for expert_id in expert_id_list:
         cnt = avg
         if i < m:
@@ -232,6 +236,8 @@ def assign(request):
         dataset = dataset[0]
         dataset.dataset_assign_time = mission_create_time
         dataset.save()
+
+        print("-----Action before data finish------")
         for _ in range(cnt):
             data[data_ptr].data_mission_id = mission.mission_id
             data[data_ptr].save()

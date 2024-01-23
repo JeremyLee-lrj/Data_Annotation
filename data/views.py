@@ -21,44 +21,99 @@ def List(request):
     if session.session_usertype == 'manager':
         return JsonResponse({'response': "非专家用户"})
     mission_id = request.GET.get("mission_id")
+    pageSize = request.GET.get("pageSize")
+    current = request.GET.get("current")
+    pageSize = int(pageSize)
+    current = int(current)
+    st = pageSize * (current - 1)
+    # assert (st >= 0)
+    if st < 0:
+        st = 0
     mission = Mission.objects.filter(mission_id=mission_id)
     mission = mission[0]
-    data_all = Data.objects.filter(data_mission_id=mission_id)
+    # data_all = Data.objects.filter(data_mission_id=mission_id)
+    data_labeled = Data.objects.filter(data_mission_id=mission_id, data_status=1)
+    data_not_labeled = Data.objects.filter(data_mission_id=mission_id, data_status=0)
+    data_labeled_len = len(data_labeled)
+    data_not_labeled_len = len(data_not_labeled)
     dataset = Dataset.objects.filter(dataset_id=mission.mission_dataset_id)
     dataset = dataset[0]
     task_type = dataset.dataset_task_type
     data_source = dataset.dataset_source
     res = []
-    for data in data_all:
-        if data.data_reserve == 0:  # 不保留的数据过滤掉
-            continue
-        data_id = data.data_id
-        background = data.data_background
-        is_labeled = data.data_status
-        question = data.data_question
-        answer = data.data_answer
-        keywords = data.data_keyword
-        lastest_time = data.data_lastest_time
-        res.append({
-            "data_id": data_id,
-            "background": background,
-            "task_type": task_type,
-            "data_source": data_source,
-            "is_labeled": is_labeled,
-            "question": question,
-            "answer": answer,
-            "keywords": keywords,
-            "lastest_time": lastest_time,
-        })
-        temp = res
-        res = []
-        for item in temp:
-            if item["is_labeled"] == 0:
-                res.append(item)
-        for item in temp:
-            if item["is_labeled"] == 1:
-                res.append(item)
-    return JsonResponse({"response": res, "notice": mission.mission_notice})
+    tot = 0
+    if data_not_labeled_len > st:
+        for i in range(st, min(st + pageSize, data_not_labeled_len), 1):
+            res.append({
+                "data_id": data_not_labeled[i].data_id,
+                "background": data_not_labeled[i].data_background,
+                "task_type": task_type,
+                "data_source": data_source,
+                "is_labeled": data_not_labeled[i].data_status,
+                "question": data_not_labeled[i].data_question,
+                "answer": data_not_labeled[i].data_answer,
+                "keywords": data_not_labeled[i].data_keyword,
+                "lastest_time": data_not_labeled[i].data_lastest_time,
+            })
+            tot += 1
+        for i in range(min(pageSize - tot, data_labeled_len)):
+            res.append({
+                "data_id": data_labeled[i].data_id,
+                "background": data_labeled[i].data_background,
+                "task_type": task_type,
+                "data_source": data_source,
+                "is_labeled": data_labeled[i].data_status,
+                "question": data_labeled[i].data_question,
+                "answer": data_labeled[i].data_answer,
+                "keywords": data_labeled[i].data_keyword,
+                "lastest_time": data_labeled[i].data_lastest_time,
+            })
+    else:
+        st -= data_not_labeled_len
+        for i in range(st, min(pageSize + st, data_labeled_len), 1):
+            res.append({
+                "data_id": data_labeled[i].data_id,
+                "background": data_labeled[i].data_background,
+                "task_type": task_type,
+                "data_source": data_source,
+                "is_labeled": data_labeled[i].data_status,
+                "question": data_labeled[i].data_question,
+                "answer": data_labeled[i].data_answer,
+                "keywords": data_labeled[i].data_keyword,
+                "lastest_time": data_labeled[i].data_lastest_time,
+            })
+    return JsonResponse(
+        {"response": res, "notice": mission.mission_notice, "total_cnt": data_labeled_len + data_not_labeled_len})
+    # for data in data_all:
+    #     if data.data_reserve == 0:  # 不保留的数据过滤掉
+    #         continue
+    #     data_id = data.data_id
+    #     background = data.data_background
+    #     is_labeled = data.data_status
+    #     question = data.data_question
+    #     answer = data.data_answer
+    #     keywords = data.data_keyword
+    #     lastest_time = data.data_lastest_time
+    #     res.append({
+    #         "data_id": data_id,
+    #         "background": background,
+    #         "task_type": task_type,
+    #         "data_source": data_source,
+    #         "is_labeled": is_labeled,
+    #         "question": question,
+    #         "answer": answer,
+    #         "keywords": keywords,
+    #         "lastest_time": lastest_time,
+    #     })
+    #     temp = res
+    #     res = []
+    #     for item in temp:
+    #         if item["is_labeled"] == 0:
+    #             res.append(item)
+    #     for item in temp:
+    #         if item["is_labeled"] == 1:
+    #             res.append(item)
+    # return JsonResponse({"response": res, "notice": mission.mission_notice})
 
 
 def label(request):
