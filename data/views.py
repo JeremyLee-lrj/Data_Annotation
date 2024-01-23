@@ -3,6 +3,7 @@ import json
 from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
 from datetime import datetime
+
 from common.models import Data, Mission, Expert, Dataset, Session
 
 
@@ -23,7 +24,6 @@ def List(request):
     mission = Mission.objects.filter(mission_id=mission_id)
     mission = mission[0]
     data_all = Data.objects.filter(data_mission_id=mission_id)
-    data_all.order_by('data_status')
     dataset = Dataset.objects.filter(dataset_id=mission.mission_dataset_id)
     dataset = dataset[0]
     task_type = dataset.dataset_task_type
@@ -50,6 +50,14 @@ def List(request):
             "keywords": keywords,
             "lastest_time": lastest_time,
         })
+        temp = res
+        res = []
+        for item in temp:
+            if item["is_labeled"] == 0:
+                res.append(item)
+        for item in temp:
+            if item["is_labeled"] == 1:
+                res.append(item)
     return JsonResponse({"response": res, "notice": mission.mission_notice})
 
 

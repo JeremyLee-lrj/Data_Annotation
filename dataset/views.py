@@ -132,7 +132,13 @@ def upload_dataset(request):
     dataset_task_type = data.get("dataset_task_type")
     dataset_source = data.get("dataset_source")
     dataset_json = data.get("dataset_json")
-    data_list = json.loads(dataset_json)
+    # print("dataset_name:\n", dataset_name)
+    # print("dataset_task_type:\n", dataset_task_type)
+    # print("dataset_source: \n", dataset_source)
+    # print("typeof dataset_json: \n", type(dataset_json))
+    data_list = json.loads(dataset_json)["dataset_json"]
+    # print("typeof dataset_json: \n", type(data_list))
+    # print(data_list.keys())
     dataset_status = 0
     dataset_data_finished_count = 0
     dataset_size = len(data_list)
@@ -149,6 +155,8 @@ def upload_dataset(request):
         dataset_status=dataset_status
     )
     dataset.save()
+    # print("data_list[0][data_answer]:\n",
+    #       data_list[0]["data_answer"])
     for data_item in data_list:
         data = Data(
             data_dataset_id=dataset.dataset_id,
@@ -162,6 +170,7 @@ def upload_dataset(request):
             other=data_item["other"],
             data_reserve=1,
         )
+        data.save()
         res = []
         i = 0
         for ans in data.data_answer:

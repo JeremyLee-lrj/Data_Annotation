@@ -23,6 +23,7 @@ def List(request):
     if usertype == "expert":
         expert = Expert.objects.filter(expert_name=session.session_username)
         mission = mission.filter(mission_expert_id=expert[0].expert_id)
+        mission = mission.filter(mission_transfer=0)
         for mission_item in mission:
             if mission_item.mission_data_finished_count == mission_item.mission_size:
                 continue
@@ -78,6 +79,7 @@ def List(request):
                 res.append(temp[i])
         return JsonResponse({"response": res})
     elif usertype == "manager":
+        mission = mission.filter(mission_transfer=0)
         for mission_item in mission:
             if mission_item.mission_data_finished_count == mission_item.mission_size:
                 continue
@@ -259,6 +261,7 @@ def reassign(request):
     mission = Mission.objects.filter(mission_id=mission_id)
     mission = mission[0]
     mission.mission_transfer = 1
+    mission.save()
     tot = mission.mission_size
     finished_tot = mission.mission_data_finished_count
     n = len(expert_id_list)
@@ -269,6 +272,7 @@ def reassign(request):
     i = 0
     data_ptr = 0
     data = Data.objects.filter(data_mission_id=mission.mission_id, data_status=0)
+    print("tot cnt:\n", len(data))
     for expert_id in expert_id_list:
         finished_tot_cnt = finished_tot_avg
         tot_cnt = tot_avg
@@ -291,8 +295,10 @@ def reassign(request):
         )
         new_mission.save()
         for _ in range(tot_cnt - finished_tot_cnt):
-            data[data_ptr].data_mission_id = new_mission.mission_id
-            data[data_ptr].save()
+            data_now = data[data_ptr]
+            data_now.data_mission_id = new_mission.mission_id
+            # print(data_now.data_mission_id)
+            data_now.save()
             data_ptr += 1
         i += 1
     return JsonResponse({"response": "success"})
