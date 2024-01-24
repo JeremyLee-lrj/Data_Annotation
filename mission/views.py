@@ -12,7 +12,7 @@ def List(request):
     res = []
     session_id = request.headers.get("Session-Id")
     session = Session.objects.filter(session_info=session_id)
-    if len(session) == 0:
+    if session.count() == 0:
         return JsonResponse({'response': "未登录"})
 
     session = session[0]
@@ -137,7 +137,7 @@ def list_by_dataset(request):
     """
     session_id = request.headers.get("Session-Id")
     session = Session.objects.filter(session_info=session_id)
-    if len(session) == 0:
+    if session.count() == 0:
         return JsonResponse({'response': "未登录"})
 
     session = session[0]
@@ -155,7 +155,7 @@ def list_by_dataset(request):
         expert_name = expert[0].expert_name
         dataset = Dataset.objects.filter(dataset_id=mission.mission_dataset_id)
         mission_data = Data.objects.filter(data_mission_id=mission_id)
-        if len(mission_data) == 0:
+        if mission_data.count() == 0:
             area = "-"
         else:
             area = mission_data[0].data_area
@@ -191,7 +191,7 @@ def assign(request):
     print("----Get data from fron-end----")
     session_id = request.headers.get("Session-Id")
     session = Session.objects.filter(session_info=session_id)
-    if len(session) == 0:
+    if session.count() == 0:
         return JsonResponse({'response': "未登录"})
 
     session = session[0]
@@ -209,7 +209,7 @@ def assign(request):
     due_time = request.POST.get("due_time")
     n: int = len(expert_id_list)
     data = Data.objects.filter(data_dataset_id=dataset_id, data_area=area)
-    tot = len(data)
+    tot = data.count()
     m: int = tot % n
     avg: int = int(tot / n)
     i = 0
@@ -252,7 +252,7 @@ def assign(request):
 def reassign(request):
     session_id = request.headers.get("Session-Id")
     session = Session.objects.filter(session_info=session_id)
-    if len(session) == 0:
+    if session.count() == 0:
         return JsonResponse({'response': "未登录"})
 
     session = session[0]
@@ -281,7 +281,7 @@ def reassign(request):
     i = 0
     data_ptr = 0
     data = Data.objects.filter(data_mission_id=mission.mission_id, data_status=0)
-    print("tot cnt:\n", len(data))
+    # print("tot cnt:\n", len(data))
     for expert_id in expert_id_list:
         finished_tot_cnt = finished_tot_avg
         tot_cnt = tot_avg
@@ -316,7 +316,7 @@ def reassign(request):
 def urgent(request):
     session_id = request.headers.get("Session-Id")
     session = Session.objects.filter(session_info=session_id)
-    if len(session) == 0:
+    if session.count() == 0:
         return JsonResponse({'response': "未登录"})
 
     session = session[0]

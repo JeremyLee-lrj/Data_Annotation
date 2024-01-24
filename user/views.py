@@ -22,7 +22,7 @@ def generate_random_string(length):
 def get_current(request):
     session_id = request.headers.get("Session-Id")
     session = Session.objects.filter(session_info=session_id)
-    if len(session) == 0:
+    if session.count() == 0:
         return JsonResponse({'response': "未登录"})
 
     session = session[0]
@@ -60,7 +60,7 @@ def get_current(request):
 def List(request):
     session_id = request.headers.get("Session-Id")
     session = Session.objects.filter(session_info=session_id)
-    if len(session) == 0:
+    if session.count() == 0:
         return JsonResponse({'response': "未登录"})
 
     session = session[0]
@@ -85,7 +85,7 @@ def Login(request):
     # print(password)
     expert = Expert.objects.filter(expert_name=username, expert_password=password)
     manager = Manager.objects.filter(manager_name=username, manager_password=password)
-    if len(expert) > 0:
+    if expert.count() > 0:
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
@@ -93,7 +93,7 @@ def Login(request):
             request.session['usertype'] = 'expert'
             session_info = generate_random_string(10)
             exist = Session.objects.filter(session_info=session_info)
-            while len(exist) > 0:
+            while exist.count() > 0:
                 session_info = generate_random_string(10)
                 exist = Session.objects.filter(session_info=session_info)
             session = Session(
@@ -121,7 +121,7 @@ def Login(request):
             return res
         else:
             return JsonResponse({'response': '登陆失败,用户名或密码不正确'})
-    elif len(manager) > 0:
+    elif manager.count() > 0:
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
@@ -129,7 +129,7 @@ def Login(request):
             request.session['usertype'] = 'manager'
             session_info = generate_random_string(10)
             exist = Session.objects.filter(session_info=session_info)
-            while len(exist) > 0:
+            while exist.count() > 0:
                 session_info = generate_random_string(10)
                 exist = Session.objects.filter(session_info=session_info)
             session = Session(
@@ -163,7 +163,7 @@ def Login(request):
 def Logout(request):
     session_id = request.headers.get("Session_id")
     session = Session.objects.filter(session_info=session_id)
-    if len(session) != 0:
+    if session.count() != 0:
         session = session[0]
         session.session_status = 0
         session.save()
@@ -176,7 +176,7 @@ def Register(request):
     expert_area = request.POST.get('user_area')
     expert_password = request.POST.get('password')
     res = Expert.objects.filter(expert_name=expert_name)
-    if len(res) != 0:
+    if res.count() != 0:
         return JsonResponse({'response': '注册失败，用户名已存在'})
     User.objects.create_user(username=expert_name, password=expert_password)
     Expert.objects.create(expert_name=expert_name, expert_password=expert_password,
@@ -188,7 +188,7 @@ def Register_Manager(request):
     manager_name = request.POST.get('username')
     manager_password = request.POST.get('password')
     res = Manager.objects.filter(manager_name=manager_name)
-    if len(res) != 0:
+    if res.count() != 0:
         return JsonResponse({'response': '注册失败，用户名已存在'})
     User.objects.create_user(username=manager_name, password=manager_password)
     Manager.objects.create(manager_name=manager_name, manager_password=manager_password)

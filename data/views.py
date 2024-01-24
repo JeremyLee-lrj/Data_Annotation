@@ -12,7 +12,7 @@ from common.models import Data, Mission, Expert, Dataset, Session
 def List(request):
     session_id = request.headers.get("Session-Id")
     session = Session.objects.filter(session_info=session_id)
-    if len(session) == 0:
+    if session.count() == 0:
         return JsonResponse({'response': "未登录"})
 
     session = session[0]
@@ -60,7 +60,11 @@ def List(request):
         # print(st, Most)
         for i in range(st, Most, 1):
             # print(i)
+            S = time.perf_counter()
             now = data_not_labeled[i]
+            # ed = time.perf_counter()
+            # print(f"for {ed - S: 0.8}s")
+            # S = time.perf_counter()
             res.append({
                 "data_id": now.data_id,
                 "background": now.data_background,
@@ -73,6 +77,8 @@ def List(request):
                 "lastest_time": now.data_lastest_time,
                 "reserve": now.data_reserve
             })
+            # ed = time.perf_counter()
+            # print(f"for {ed - S: 0.8}s")
             tot += 1
         # ed = time.perf_counter()
         # print(f"for {ed - start: 0.8}s")
@@ -147,7 +153,7 @@ def List(request):
 def label(request):
     session_id = request.headers.get("Session-Id")
     session = Session.objects.filter(session_info=session_id)
-    if len(session) == 0:
+    if session.count() == 0:
         return JsonResponse({'response': "未登录"})
 
     session = session[0]
