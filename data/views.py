@@ -54,6 +54,7 @@ def List(request):
                 "answer": data_not_labeled[i].data_answer,
                 "keywords": data_not_labeled[i].data_keyword,
                 "lastest_time": data_not_labeled[i].data_lastest_time,
+                "reserve": data_not_labeled[i].data_reserve
             })
             tot += 1
         for i in range(min(pageSize - tot, data_labeled_len)):
@@ -67,6 +68,7 @@ def List(request):
                 "answer": data_labeled[i].data_answer,
                 "keywords": data_labeled[i].data_keyword,
                 "lastest_time": data_labeled[i].data_lastest_time,
+                "reserve": data_labeled[i].data_reserve,
             })
     else:
         st -= data_not_labeled_len
@@ -81,6 +83,7 @@ def List(request):
                 "answer": data_labeled[i].data_answer,
                 "keywords": data_labeled[i].data_keyword,
                 "lastest_time": data_labeled[i].data_lastest_time,
+                "reserve": data_labeled[i].data_reserve,
             })
     return JsonResponse(
         {"response": res, "notice": mission.mission_notice, "total_cnt": data_labeled_len + data_not_labeled_len})
