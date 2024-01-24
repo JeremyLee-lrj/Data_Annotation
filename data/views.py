@@ -1,5 +1,5 @@
 import json
-
+import time
 from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
 from datetime import datetime
@@ -32,10 +32,22 @@ def List(request):
     mission = Mission.objects.filter(mission_id=mission_id)
     mission = mission[0]
     # data_all = Data.objects.filter(data_mission_id=mission_id)
-    data_labeled = Data.objects.filter(data_mission_id=mission_id, data_status=1)
-    data_not_labeled = Data.objects.filter(data_mission_id=mission_id, data_status=0)
-    data_labeled_len = len(data_labeled)
-    data_not_labeled_len = len(data_not_labeled)
+    # start = time.perf_counter()
+    data = Data.objects.filter(data_mission_id=mission_id)
+    # ed = time.perf_counter()
+    # print(f"Data.objects.filter(data_mission_id={mission_id}) 耗时：{ed - start} 秒")
+
+    # start = time.perf_counter()
+    data_labeled = data.filter(data_status=1)
+    data_not_labeled = data.filter(data_status=0)
+    # ed = time.perf_counter()
+    # print(f"data.filter(data_status=1) 耗时：{ed - start} 秒")
+
+    # start = time.perf_counter()
+    data_labeled_len = data_labeled.count()
+    data_not_labeled_len = data_not_labeled.count()
+    # ed = time.perf_counter()
+    # print(f"len(data_labeled) 耗时：{ed - start} 秒")
     dataset = Dataset.objects.filter(dataset_id=mission.mission_dataset_id)
     dataset = dataset[0]
     task_type = dataset.dataset_task_type
@@ -43,47 +55,60 @@ def List(request):
     res = []
     tot = 0
     if data_not_labeled_len > st:
-        for i in range(st, min(st + pageSize, data_not_labeled_len), 1):
+        # start = time.perf_counter()
+        Most = min(st + pageSize, data_not_labeled_len)
+        # print(st, Most)
+        for i in range(st, Most, 1):
+            # print(i)
+            now = data_not_labeled[i]
             res.append({
-                "data_id": data_not_labeled[i].data_id,
-                "background": data_not_labeled[i].data_background,
+                "data_id": now.data_id,
+                "background": now.data_background,
                 "task_type": task_type,
                 "data_source": data_source,
-                "is_labeled": data_not_labeled[i].data_status,
-                "question": data_not_labeled[i].data_question,
-                "answer": data_not_labeled[i].data_answer,
-                "keywords": data_not_labeled[i].data_keyword,
-                "lastest_time": data_not_labeled[i].data_lastest_time,
-                "reserve": data_not_labeled[i].data_reserve
+                "is_labeled": now.data_status,
+                "question": now.data_question,
+                "answer": now.data_answer,
+                "keywords": now.data_keyword,
+                "lastest_time": now.data_lastest_time,
+                "reserve": now.data_reserve
             })
             tot += 1
-        for i in range(min(pageSize - tot, data_labeled_len)):
+        # ed = time.perf_counter()
+        # print(f"for {ed - start: 0.8}s")
+        Total = min(pageSize - tot, data_labeled_len)
+        for i in range(Total):
+            # pass
+            now = data_labeled[i]
             res.append({
-                "data_id": data_labeled[i].data_id,
-                "background": data_labeled[i].data_background,
+                "data_id": now.data_id,
+                "background": now.data_background,
                 "task_type": task_type,
                 "data_source": data_source,
-                "is_labeled": data_labeled[i].data_status,
-                "question": data_labeled[i].data_question,
-                "answer": data_labeled[i].data_answer,
-                "keywords": data_labeled[i].data_keyword,
-                "lastest_time": data_labeled[i].data_lastest_time,
-                "reserve": data_labeled[i].data_reserve,
+                "is_labeled": now.data_status,
+                "question": now.data_question,
+                "answer": now.data_answer,
+                "keywords": now.data_keyword,
+                "lastest_time": now.data_lastest_time,
+                "reserve": now.data_reserve,
             })
+
     else:
+        # print("Dont slash my face")
         st -= data_not_labeled_len
         for i in range(st, min(pageSize + st, data_labeled_len), 1):
+            now = data_labeled[i]
             res.append({
-                "data_id": data_labeled[i].data_id,
-                "background": data_labeled[i].data_background,
+                "data_id": now.data_id,
+                "background": now.data_background,
                 "task_type": task_type,
                 "data_source": data_source,
-                "is_labeled": data_labeled[i].data_status,
-                "question": data_labeled[i].data_question,
-                "answer": data_labeled[i].data_answer,
-                "keywords": data_labeled[i].data_keyword,
-                "lastest_time": data_labeled[i].data_lastest_time,
-                "reserve": data_labeled[i].data_reserve,
+                "is_labeled": now.data_status,
+                "question": now.data_question,
+                "answer": now.data_answer,
+                "keywords": now.data_keyword,
+                "lastest_time": now.data_lastest_time,
+                "reserve": now.data_reserve,
             })
     return JsonResponse(
         {"response": res, "notice": mission.mission_notice, "total_cnt": data_labeled_len + data_not_labeled_len})
