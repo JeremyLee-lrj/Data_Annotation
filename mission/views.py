@@ -22,18 +22,21 @@ def List(request):
     mission = Mission.objects.all()
     if usertype == "expert":
         expert = Expert.objects.filter(expert_name=session.session_username)
-        mission = mission.filter(mission_expert_id=expert[0].expert_id)
-        mission = mission.filter(mission_transfer=0)
+        mission = mission.filter(mission_expert_id=expert[0].expert_id, mission_transfer=0)
         for mission_item in mission:
             if mission_item.mission_data_finished_count == mission_item.mission_size:
                 continue
             dataset = Dataset.objects.filter(dataset_id=mission_item.mission_dataset_id)
             task_type = dataset[0].dataset_task_type
-            mission_data = Data.objects.filter(data_mission_id=mission_item.mission_id)
-            if len(mission_data) == 0:
+            # mission_data = Data.objects.filter(data_mission_id=mission_item.mission_id)
+            # if len(mission_data) == 0:
+            #     area = "-"
+            # else:
+            #     area = mission_data[0].data_area
+            if mission_item.mission_size == 0:
                 area = "-"
             else:
-                area = mission_data[0].data_area
+                area = mission_item.mission_area
             resource = dataset[0].dataset_source
             assign_time = mission_item.mission_create_time
             due_time = mission_item.mission_due_time
