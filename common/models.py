@@ -10,14 +10,14 @@ class Manager(models.Model):
 
 
 class Expert(models.Model):
-    expert_id = models.AutoField(primary_key=True)
+    expert_id = models.AutoField(primary_key=True, db_index=True)
     expert_name = models.CharField(max_length=200)
     expert_password = models.CharField(max_length=200)
     expert_area = models.CharField(max_length=200, null=True)
 
 
 class Dataset(models.Model):
-    dataset_id = models.AutoField(primary_key=True)
+    dataset_id = models.AutoField(primary_key=True, db_index=True)
     dataset_name = models.CharField(max_length=200)
     dataset_size = models.IntegerField()
     dataset_data_finished_count = models.IntegerField()
@@ -29,7 +29,7 @@ class Dataset(models.Model):
 
 
 class Data(models.Model):
-    data_id = models.AutoField(primary_key=True)
+    data_id = models.AutoField(primary_key=True, db_index=True)
     data_dataset_id = models.IntegerField()
     data_mission_id = models.IntegerField(null=True)
     data_background = models.TextField(null=True)
@@ -44,7 +44,7 @@ class Data(models.Model):
 
 
 class Mission(models.Model):
-    mission_id = models.AutoField(primary_key=True)
+    mission_id = models.AutoField(primary_key=True, db_index=True)
     mission_expert_id = models.IntegerField()
     mission_dataset_id = models.IntegerField()
     mission_area = models.CharField(max_length=200, null=True)
