@@ -38,8 +38,8 @@ def List(request):
     # print(f"Data.objects.filter(data_mission_id={mission_id}) 耗时：{ed - start} 秒")
 
     # start = time.perf_counter()
-    data_labeled = data.filter(data_status=1)
-    data_not_labeled = data.filter(data_status=0)
+    data_labeled = data.filter(data_status=1).values()
+    data_not_labeled = data.filter(data_status=0).values()
     # ed = time.perf_counter()
     # print(f"data.filter(data_status=1) 耗时：{ed - start} 秒")
 
@@ -54,6 +54,8 @@ def List(request):
     data_source = dataset.dataset_source
     res = []
     tot = 0
+    time_for_copy = 0
+    time_for_append = 0
     if data_not_labeled_len > st:
         # start = time.perf_counter()
         Most = min(st + pageSize, data_not_labeled_len)
@@ -62,22 +64,24 @@ def List(request):
             # print(i)
             S = time.perf_counter()
             now = data_not_labeled[i]
-            # ed = time.perf_counter()
+            ed = time.perf_counter()
+            time_for_copy += ed - S
             # print(f"for {ed - S: 0.8}s")
-            # S = time.perf_counter()
+            S = time.perf_counter()
             res.append({
-                "data_id": now.data_id,
-                "background": now.data_background,
+                "data_id": now["data_id"],
+                "background": now["data_background"],
                 "task_type": task_type,
                 "data_source": data_source,
-                "is_labeled": now.data_status,
-                "question": now.data_question,
-                "answer": now.data_answer,
-                "keywords": now.data_keyword,
-                "lastest_time": now.data_lastest_time,
-                "reserve": now.data_reserve
+                "is_labeled": now["data_status"],
+                "question": now["data_question"],
+                "answer": now["data_answer"],
+                "keywords": now["data_keyword"],
+                "lastest_time": now["data_lastest_time"],
+                "reserve": now["data_reserve"],
             })
-            # ed = time.perf_counter()
+            ed = time.perf_counter()
+            time_for_append += ed - S
             # print(f"for {ed - S: 0.8}s")
             tot += 1
         # ed = time.perf_counter()
@@ -87,22 +91,24 @@ def List(request):
             # pass
             now = data_labeled[i]
             res.append({
-                "data_id": now.data_id,
-                "background": now.data_background,
+                "data_id": now["data_id"],
+                "background": now["data_background"],
                 "task_type": task_type,
                 "data_source": data_source,
-                "is_labeled": now.data_status,
-                "question": now.data_question,
-                "answer": now.data_answer,
-                "keywords": now.data_keyword,
-                "lastest_time": now.data_lastest_time,
-                "reserve": now.data_reserve,
+                "is_labeled": now["data_status"],
+                "question": now["data_question"],
+                "answer": now["data_answer"],
+                "keywords": now["data_keyword"],
+                "lastest_time": now["data_lastest_time"],
+                "reserve": now["data_reserve"],
             })
-
+        print(time_for_copy)
+        print(time_for_append)
     else:
         # print("Dont slash my face")
         st -= data_not_labeled_len
-        for i in range(st, min(pageSize + st, data_labeled_len), 1):
+        R = min(pageSize + st, data_labeled_len)
+        for i in range(st, R, 1):
             now = data_labeled[i]
             res.append({
                 "data_id": now.data_id,

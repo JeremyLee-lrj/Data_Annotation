@@ -7,8 +7,6 @@
     <list default="true" id="1727e937-8f02-49b7-b965-41343f5d5e55" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataset/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mission/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/mission/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/user/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -244,12 +242,24 @@
       <workItem from="1705914496323" duration="95000" />
       <workItem from="1705977550428" duration="17128000" />
       <workItem from="1706001713368" duration="18707000" />
-      <workItem from="1706071052724" duration="22113000" />
+      <workItem from="1706071052724" duration="22394000" />
+      <workItem from="1706239460855" duration="12823000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Data_Annotation$views__1_.coverage" NAME="views (1) Coverage Results" MODIFIED="1703421798317" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/dataset" />

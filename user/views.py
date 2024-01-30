@@ -69,6 +69,18 @@ def List(request):
     if session.session_usertype == 'expert':
         return JsonResponse({'response': "非管理员用户"})
     qs = Expert.objects.all()
+    qs_list = qs.values_list()
+    qs_values = qs.values().filter(expert_id=1)
+    print(type(qs_list))
+    print(type(qs_values))
+    for item in qs_list:
+        print(item)
+        print(type(item))
+        print(item[1])
+    for item in qs_values:
+        print(item)
+        print(type(item))
+        print(item['expert_name'])
     res = []
     for expert in qs:
         data = {'expert_id': expert.expert_id, 'expert_name': expert.expert_name,
